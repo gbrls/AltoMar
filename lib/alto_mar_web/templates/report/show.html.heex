@@ -1,0 +1,9 @@
+<%= link "All reports", to: Routes.report_path(@conn, :index) %>
+
+<p> <.title report={@report} /> </p>
+
+<pre>
+  <code>
+    <%= inspect(@report, pretty: true) %>
+  </code>
+</pre>

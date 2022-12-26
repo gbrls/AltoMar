@@ -1,0 +1,13 @@
+<h1> Listing Reports </h1>
+<p> <%= link "New", to: Routes.report_path(@conn, :new_test) %> </p>
+
+<table>
+
+  <%= for report <- @reports do %>
+  <tr>
+    <td> <.title report={report}/> </td>
+    <td> <%= link "View", to: Routes.report_path(@conn, :show, id(report)) %> </td>
+  </tr>
+  <% end %>
+
+</table>
