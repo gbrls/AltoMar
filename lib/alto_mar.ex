@@ -149,6 +149,7 @@ defmodule AltoMar.ReportWorker do
       |> then(field(["#content", "service", "-hostname"], :hostname))
       |> then(field(["#content", "service", "-name"], :name))
       |> then(field(["#content", "service", "-ostype"], :os))
+      |> then(field(["#content", "script"], :scripts, &read_scripts/1))
 
     y
   end
@@ -183,7 +184,17 @@ defmodule AltoMar.ReportWorker do
 
   def field(path, name, f \\ fn x -> x end) do
     gf = fn {x, y} ->
-      data = get_in(x, path)
+      fst = hd(path)
+
+      data =
+        case x do
+          {^fst, %{} = rest} -> get_in(rest, tl(path))
+          {^fst, rest} -> rest
+          %{} = mp -> get_in(mp, path)
+          any -> {:error, "unmatched", any}
+        end
+
+      # data = get_in(x, path)
 
       if !is_nil(data) do
         {x, y |> Map.put(name, f.(data))}
@@ -191,6 +202,63 @@ defmodule AltoMar.ReportWorker do
         {x, y}
       end
     end
+
     gf
+  end
+
+  def read_scripts([_ | _] = scripts) do
+    Logger.info("Matched array")
+    scripts |> Enum.map(&read_scripts/1)
+  end
+
+  def read_scripts(%{} = script) do
+    Logger.info("SCRIPT #{inspect(script, pretty: true)}")
+    id = Map.get(script, "-id")
+
+    mp =
+      case id do
+        "vulners" ->
+          cves =
+            script
+            |> get_in(["#content", "table", "#content", "table"])
+            |> Enum.map(fn tbl ->
+              case tbl do
+                %{"elem" => mp} ->
+                  cvss =
+                    mp
+                    |> Enum.find(&(Map.get(&1, "-key") == "cvss"))
+                    |> Map.get("#content")
+                    |> String.to_float()
+
+                  cve_id = mp |> Enum.find(&(Map.get(&1, "-key") == "id")) |> Map.get("#content")
+                  {cvss, cve_id}
+
+                {"elem", mp} ->
+                  cvss =
+                    mp
+                    |> Enum.find(&(Map.get(&1, "-key") == "cvss"))
+                    |> Map.get("#content")
+                    |> String.to_float()
+
+                  cve_id = mp |> Enum.find(&(Map.get(&1, "-key") == "id")) |> Map.get("#content")
+                  {cvss, cve_id}
+
+                _ ->
+                  tbl
+              end
+            end)
+
+          %{cves: cves}
+
+        _ ->
+          %{}
+      end
+
+    mp |> Map.put(:id, id)
+  end
+
+  # Do nothing if we don't match the data format
+  def read_scripts(x) do
+    x
   end
 end
