@@ -110,15 +110,23 @@ defmodule AltoMar.ReportWorker do
       File.write!("/Users/gabriel.shneider/alto_mar/#{fname}.json", json)
     end
 
-    case hosts do
-      %{} = mp ->
-        Logger.info("ONE HOST")
-        [report_from_ip(mp)]
+    all_ips =
+      case hosts do
+        %{} = mp ->
+          Logger.info("ONE HOST")
+          [report_from_ip(mp)]
 
-      [_ | _] = arr ->
-        Logger.info("MANY HOSTS")
-        Enum.map(arr, &report_from_ip(&1))
-    end
+        [_ | _] = arr ->
+          Logger.info("MANY HOSTS")
+          Enum.map(arr, &report_from_ip(&1))
+      end
+
+    Logger.info("DATA READ #{inspect(all_ips, pretty: true)}")
+
+    all_ips
+    |> Enum.each(fn ip ->
+      AltoMar.InternetAddress.add_ip(ip)
+    end)
 
     {:noreply, state}
   end
@@ -134,8 +142,12 @@ defmodule AltoMar.ReportWorker do
 
     if !is_nil(port_loc) do
       ports = port_loc |> Enum.map(&get_service/1)
-      Logger.info(ip)
-      Logger.info(inspect(ports, pretty: true))
+      # Logger.info(ip)
+      # Logger.info(inspect(ports, pretty: true))
+
+      %{ip: ip, ports: ports}
+    else
+      %{ip: ip}
     end
   end
 

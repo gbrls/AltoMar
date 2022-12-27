@@ -1,11 +1,12 @@
-defmodule AltoMar.Service do
+defmodule AltoMar.InternetAddress do
   alias AltoMar.InternetAddress.IP
-  use Ecto.Schema
+  alias AltoMar.Repo
 
-  schema "services" do
-    field :cpe, :string
-    field :port, :decimal
-    field :vulns, {:array, :string}
-    belongs_to :ip, IP
+  def list_ips() do
+    Repo.all(IP)
+  end
+
+  def add_ip(attrs \\ %{}) do
+    %IP{} |> IP.changeset(attrs) |> Repo.insert()
   end
 end

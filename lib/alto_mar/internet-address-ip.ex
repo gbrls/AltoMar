@@ -4,17 +4,14 @@ defmodule AltoMar.InternetAddress.IP do
   alias AltoMar.Service
 
   schema "ips" do
-    field :ip, :string # TODO: Change for a better type
+    # TODO: Change for a better type
+    field :ip, :string
     has_many :services, Service
-    field :last_report, :map 
     timestamps()
   end
-end
 
-defmodule AltoMar.InternetAddress do
-
-
-  def import_report() do
-    
+  def changeset(ip, attrs) do
+    ip |> cast(attrs, [:ip]) |> validate_required([:ip])
   end
 end
+
