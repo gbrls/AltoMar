@@ -128,10 +128,7 @@ defmodule AltoMar.ReportWorker do
       nip = AltoMar.InternetAddress.add_ip!(ip)
 
       if Map.has_key?(ip, :ports) do
-        ip.ports
-        |> Enum.each(fn service ->
-          AltoMar.InternetAddress.add_service(nip, service)
-        end)
+        AltoMar.InternetAddress.add_services(id, ip.ports)
       end
     end)
 
@@ -162,14 +159,7 @@ defmodule AltoMar.ReportWorker do
     {_, y} =
       {mp, %{}}
       |> port_n_protocol()
-      |> then(
-        field(["#content", "service", "#content", "cpe"], :cpe, fn cpe ->
-          case cpe do
-            [_, _] = l -> l |> Enum.join("\n")
-            x -> x
-          end
-        end)
-      )
+      |> then(field(["#content", "service", "#content", "cpe"], :cpe))
       |> then(field(["#content", "service", "-product"], :product))
       |> then(field(["#content", "service", "-version"], :version))
       |> then(field(["#content", "service", "-hostname"], :hostname))

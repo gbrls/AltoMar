@@ -18,17 +18,24 @@ defmodule AltoMarWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
+
+    # Delete all of this
     get "/commands", PageController, :commands
     live "/cmdlive", CommandsLive
 
+    # Delete all of this
     get "/reports", ReportController, :index
     get "/report/:id", ReportController, :show
     post "/report", ReportController, :create
     get "/new_test", ReportController, :new_test
     
 
+    # Delete this
     get "/import/nmap-xml", ImportController, :nmap_xml
+
     live "/import/upload", UploadLive
+    get "ips", IPController, :index
+    get "ip/:ip", IPController, :show
   end
 
 

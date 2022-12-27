@@ -6,12 +6,21 @@ defmodule AltoMar.Service do
   import Ecto.Changeset
 
   schema "services" do
-    field :port, :decimal
-    has_many :vulns, CVE
+    field :port, :integer
+    field :cpe, :string
+    field :image, :binary
+
+    field :name, :string
+    field :protocol, :string
+    field :product, :string
+    field :version, :string
+    # has_many :vulns, CVE
+    field :vulns, {:array, :map}
     belongs_to :ip, IP
+    field :report, :map
   end
 
   def changeset(service, attrs) do
-    service |> cast(attrs, [:ip, :port, :vulns]) |> validate_required([:ip, :port])
+    service |> cast(attrs, [:ip, :port]) |> validate_required([:ip, :port])
   end
 end
