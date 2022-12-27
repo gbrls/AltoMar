@@ -2,7 +2,8 @@ defmodule AltoMarWeb.IPController do
   use AltoMarWeb, :controller
 
   def index(conn, _params) do
-    ips = AltoMar.InternetAddress.list_ips()
+    ips = AltoMar.InternetAddress.list_ips() |> Enum.sort_by(&(-length(&1.services)))
+
     render(conn, :index, ips: ips)
   end
 

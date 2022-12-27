@@ -6,15 +6,17 @@ defmodule AltoMar.InternetAddress do
   import Ecto
 
   def list_ips() do
-    Repo.all(IP)
+    Repo.all(IP) |> Repo.preload(:services)
   end
 
   def get_by!(params) do
-    Repo.get_by!(IP, params) |> Repo.preload(:services)
+    IP
+    |> Repo.get_by!(params)
+    |> Repo.preload(:services)
   end
 
   def add_ip!(attrs \\ %{}) do
-    {:ok, %IP{} = ip} = %IP{} |> IP.changeset(attrs) |> Repo.insert(returning: true)
+    {:ok, %IP{} = ip} = %IP{} |> IP.changeset(attrs) |> Repo.insert_or_update(returning: true)
     ip
   end
 

@@ -16,6 +16,7 @@ defmodule AltoMar.Service do
     field :version, :string
     # has_many :vulns, CVE
     field :vulns, {:array, :map}
+    # Maybe put ip_id here instead?
     belongs_to :ip, IP
     field :report, :map
   end
